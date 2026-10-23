@@ -26,6 +26,16 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedDetail: null // { type: 'area'|'pair', item: Object }
   };
 
+  // Interconnection Pair Mappings
+  const PAIR_MAPPINGS = [
+    { id: 'P01', area1: 'E01', area2: 'E07' },
+    { id: 'P02', area1: 'E02', area2: 'E08' },
+    { id: 'P03', area1: 'E03', area2: 'E09' },
+    { id: 'P04', area1: 'E04', area2: 'E10' },
+    { id: 'P05', area1: 'E05', area2: 'E11' },
+    { id: 'P06', area1: 'E06', area2: 'E12' }
+  ];
+
   // Color Palette for 12 Life Areas
   const areaColors = [
     '#2196F3', // E01 Blue
@@ -207,8 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (Math.cos(midAngle) > 0.2) textAnchor = 'start';
       if (Math.cos(midAngle) < -0.2) textAnchor = 'end';
 
+      const pairMap = PAIR_MAPPINGS.find(m => m.area1 === area.id || m.area2 === area.id);
+      const pairId = pairMap ? pairMap.id : '';
+
       svgHtml += `
-        <g class="wheel-slice-group" data-area-id="${area.id}" tabIndex="0" role="button" aria-label="${area.title}: ${score} pont">
+        <g class="wheel-slice-group" data-area-id="${area.id}" data-pair-id="${pairId}" tabIndex="0" role="button" aria-label="${area.title}: ${score} pont">
           <path d="${pathData}" fill="${fillColor}" fill-opacity="0.78" stroke="#FFFFFF" stroke-width="2"/>
           <circle cx="${labelX}" cy="${labelY}" r="14" fill="${fillColor}" />
           <text x="${labelX}" y="${labelY + 4}" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="11" text-anchor="middle">${score}</text>
@@ -225,17 +238,44 @@ document.addEventListener('DOMContentLoaded', () => {
     svgHtml += `</svg>`;
     wheelSvgContainer.innerHTML = svgHtml;
 
-    // Attach click events to SVG slices
+    // Attach click and hover events to SVG slices
     const sliceGroups = wheelSvgContainer.querySelectorAll('.wheel-slice-group');
     sliceGroups.forEach(group => {
       const areaId = group.getAttribute('data-area-id');
+      const pairId = group.getAttribute('data-pair-id');
+
       group.addEventListener('click', () => {
-        openAreaDetail(areaId);
+        handleSliceClick(areaId);
       });
+
       group.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          openAreaDetail(areaId);
+          handleSliceClick(areaId);
+        }
+      });
+
+      group.addEventListener('mouseenter', () => {
+        if (state.activeWheelMode === 'pairs' && pairId) {
+          highlightPairSlices(pairId, true);
+        }
+      });
+
+      group.addEventListener('mouseleave', () => {
+        if (pairId) {
+          highlightPairSlices(pairId, false);
+        }
+      });
+
+      group.addEventListener('focus', () => {
+        if (state.activeWheelMode === 'pairs' && pairId) {
+          highlightPairSlices(pairId, true);
+        }
+      });
+
+      group.addEventListener('blur', () => {
+        if (pairId) {
+          highlightPairSlices(pairId, false);
         }
       });
     });
@@ -270,18 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3.2 Render Interconnections (Pairs) List
     pairsListContainer.innerHTML = '';
 
-    // Mapping 6 interconnection pairs to life area IDs
-    const pairMappings = [
-      { id: 'P01', area1: 'E01', area2: 'E07' },
-      { id: 'P02', area1: 'E02', area2: 'E08' },
-      { id: 'P03', area1: 'E03', area2: 'E09' },
-      { id: 'P04', area1: 'E04', area2: 'E10' },
-      { id: 'P05', area1: 'E05', area2: 'E11' },
-      { id: 'P06', area1: 'E06', area2: 'E12' }
-    ];
-
     INTERCONNECTIONS.forEach((pair, index) => {
-      const map = pairMappings.find(m => m.id === pair.id);
+      const map = PAIR_MAPPINGS.find(m => m.id === pair.id);
       const score1 = state.scores[map.area1] || 5;
       const score2 = state.scores[map.area2] || 5;
 
@@ -299,7 +329,46 @@ document.addEventListener('DOMContentLoaded', () => {
         openPairDetail(pair.id, map);
       });
 
+      btn.addEventListener('mouseenter', () => {
+        highlightPairSlices(pair.id, true);
+      });
+
+      btn.addEventListener('mouseleave', () => {
+        highlightPairSlices(pair.id, false);
+      });
+
+      btn.addEventListener('focus', () => {
+        highlightPairSlices(pair.id, true);
+      });
+
+      btn.addEventListener('blur', () => {
+        highlightPairSlices(pair.id, false);
+      });
+
       pairsListContainer.appendChild(btn);
+    });
+  }
+
+  function handleSliceClick(areaId) {
+    if (state.activeWheelMode === 'pairs') {
+      const map = PAIR_MAPPINGS.find(m => m.area1 === areaId || m.area2 === areaId);
+      if (map) {
+        openPairDetail(map.id, map);
+      }
+    } else {
+      openAreaDetail(areaId);
+    }
+  }
+
+  function highlightPairSlices(pairId, highlight) {
+    if (!pairId) return;
+    const slices = wheelSvgContainer.querySelectorAll(`.wheel-slice-group[data-pair-id="${pairId}"]`);
+    slices.forEach(slice => {
+      if (highlight) {
+        slice.classList.add('pair-highlight');
+      } else {
+        slice.classList.remove('pair-highlight');
+      }
     });
   }
 
@@ -344,6 +413,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. Toggle View Modes (Életterületek / Összefüggések)
   function setWheelMode(mode) {
     state.activeWheelMode = mode;
+
+    // Clear any active pair highlights when switching modes
+    const highlightedSlices = wheelSvgContainer.querySelectorAll('.pair-highlight');
+    highlightedSlices.forEach(s => s.classList.remove('pair-highlight'));
+
     if (mode === 'areas') {
       toggleModeAreas.classList.add('active');
       toggleModeAreas.setAttribute('aria-selected', 'true');

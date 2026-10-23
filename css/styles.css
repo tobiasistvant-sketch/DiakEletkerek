@@ -566,6 +566,12 @@ body {
   filter: brightness(1.12);
 }
 
+.wheel-slice-group.pair-highlight path {
+  filter: brightness(1.15) saturate(1.2);
+  stroke: #052738;
+  stroke-width: 3.5px;
+}
+
 .wheel-actions {
   margin-top: 1.5rem;
 }
