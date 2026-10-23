@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DiákÉletkerék – Önreflexiós és Önösmereti Műhely</title>
+  <meta name="description" content="Interaktív önismereti webalkalmazás középiskolás diákok számára - DiákÉletkerék.">
+
+  <!-- CSS StyleSheet -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- SKIP LINK FOR ACCESSIBILITY -->
+  <a href="#main-content" class="skip-link">Ugrás a fő tartalomhoz</a>
+
+  <!-- MAIN CONTAINER -->
+  <div class="app-container">
+
+    <!-- HEADER -->
+    <header class="app-header" role="banner">
+      <div class="header-inner">
+        <div class="logo-area" id="header-logo-btn" style="cursor: pointer;">
+          <div class="logo-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2v20M2 12h20"/>
+              <circle cx="12" cy="12" r="4"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="app-title-header">DiákÉletkerék</span>
+            <span class="app-subtitle-header">Önismeret és Útmutatás</span>
+          </div>
+        </div>
+
+        <div class="header-meta">
+          <span class="subject-badge">Keresztyén önismeret és életvezetés</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content" class="app-main" tabindex="-1">
+
+      <!-- SCREEN 1: START / KEZDŐOLDAL -->
+      <section id="screen-start" class="screen active" aria-labelledby="start-title">
+        <div class="hero-card">
+          <div class="hero-badge">Interaktív önismereti feladat középiskolásoknak</div>
+          <h1 id="start-title" class="hero-title">DiákÉletkerék</h1>
+          <p class="hero-subtitle">Milyen egyensúlyban van most az életed?</p>
+
+          <p class="hero-intro">
+            Az életünk sok különböző területből áll: tanulás, kapcsolatok, pihenés, tervek és belső értékek.
+            Néha érdemes megállni egy pillanatra, és ránézni arra, hol tartasz éppen, miben érzel egyensúlyt, és miben lenne szükséged feltöltődésre vagy változtatásra.
+          </p>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="info-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <h3>Nem dolgozat!</h3>
+              <p>Nincsenek jó vagy rossz válaszok. Nem kaphatsz rá jegyet, és senki sem fog megítélni a pontjaid alapján.</p>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              </div>
+              <h3>Önreflexió</h3>
+              <p>A feladat célja, hogy elgondolkodj a saját élethelyzeteden, és őszintén értékeld a mindennapjaidat.</p>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="7"/></svg>
+              </div>
+              <h3>Saját Életkerék</h3>
+              <p>Az értékelésed alapján elkészül a saját, kattintható életkereked, ahol igéket és gondolatébresztő kérdéseket fedezhetsz fel.</p>
+            </div>
+          </div>
+
+          <div class="start-action">
+            <button id="btn-start-task" class="btn btn-primary btn-lg">
+              Kezdés
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SCREEN 2: ASSESSMENT / ÖNÉRTÉKELÉS -->
+      <section id="screen-assessment" class="screen" aria-labelledby="assessment-title">
+        <div class="page-header">
+          <div class="step-badge">1. Lépés: Önértékelés</div>
+          <h2 id="assessment-title" class="section-title">Értékeld az életterületeidet!</h2>
+          <p class="section-desc">
+            Gondold végig az alábbi 12 életterületet, és adj mindegyikre egy pontszámot 1-től (egyáltalán nem vagyok elégedett) 10-ig (teljesen elégedett vagyok)!
+          </p>
+        </div>
+
+        <form id="assessment-form" onsubmit="return false;">
+          <div id="assessment-cards-container" class="assessment-grid">
+            <!-- Dynamic life area cards injected by js/app.js -->
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="btn-generate-wheel" class="btn btn-primary btn-xl">
+              DiákÉletkerék generálása
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="7"/></svg>
+            </button>
+          </div>
+        </form>
+      </section>
+
+
+      <!-- SCREEN 3: INTERACTIVE WHEEL / DIÁKÉLETKERÉK -->
+      <section id="screen-wheel" class="screen" aria-labelledby="wheel-title">
+        <div class="wheel-header">
+          <div class="step-badge">2. Lépés: Interaktív Életkerék</div>
+          <h2 id="wheel-title" class="section-title">A te DiákÉletkereked</h2>
+          <p class="section-desc">Kattints a kerék szeleteire vagy az alábbi listára a részletes bibliai tanításokért és gondolatokért!</p>
+
+          <!-- VIEW MODE TOGGLE -->
+          <div class="view-toggle-container" role="tablist" aria-label="Nézetválasztó">
+            <button type="button" id="toggle-mode-areas" class="toggle-btn active" role="tab" aria-selected="true" aria-controls="view-areas">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+              Életterületek (12)
+            </button>
+            <button type="button" id="toggle-mode-pairs" class="toggle-btn" role="tab" aria-selected="false" aria-controls="view-pairs">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7h11M8 12h11M8 17h11M3 7h2M3 12h2M3 17h2"/></svg>
+              Összefüggések (6)
+            </button>
+          </div>
+        </div>
+
+        <div class="wheel-workspace">
+          <!-- SVG WHEEL CONTAINER -->
+          <div class="wheel-visual-card">
+            <div id="wheel-svg-container" class="svg-wheel-wrapper">
+              <!-- SVG generated dynamically by app.js -->
+            </div>
+
+            <div class="wheel-actions">
+              <button type="button" id="btn-recalculate" class="btn btn-secondary btn-sm">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Pontszámok módosítása
+              </button>
+            </div>
+          </div>
+
+          <!-- LIST SELECTION AREA -->
+          <div class="wheel-list-card">
+            <div id="view-areas-list" class="interactive-list-view active">
+              <h3 class="list-title">Kattints egy életterületre:</h3>
+              <div id="areas-list-container" class="items-button-grid">
+                <!-- Dynamically populated buttons -->
+              </div>
+            </div>
+
+            <div id="view-pairs-list" class="interactive-list-view" style="display: none;">
+              <h3 class="list-title">Kattints egy összefüggéspárra:</h3>
+              <p class="list-subtitle">Fedezd fel, hogyan hatnak egymásra az életed szemben fekvő területei!</p>
+              <div id="pairs-list-container" class="pairs-button-grid">
+                <!-- Dynamically populated interconnections -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SCREEN 4: DETAIL VIEW / RÉSZLETES TARTALOM -->
+      <section id="screen-detail" class="screen" aria-labelledby="detail-title">
+        <div class="detail-container">
+          <button type="button" id="btn-back-to-wheel" class="btn btn-secondary btn-back">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Vissza a DiákÉletkerékhez
+          </button>
+
+          <article class="detail-card">
+            <header class="detail-header">
+              <span id="detail-type-badge" class="detail-badge">Életterület</span>
+              <h2 id="detail-title" class="detail-title-text">Önismeret</h2>
+              <div id="detail-score-box" class="detail-score-box">
+                <span class="score-label">Megadott pontszámod:</span>
+                <span id="detail-score-val" class="score-number">8 / 10</span>
+              </div>
+            </header>
+
+            <div class="detail-content-blocks">
+              <!-- BIBLICAL VERSE BLOCK -->
+              <div class="content-block block-verse">
+                <div class="block-icon">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+                <div class="block-body">
+                  <h4>Bibliai tanítás</h4>
+                  <blockquote id="detail-verse-text" class="verse-quote"></blockquote>
+                </div>
+              </div>
+
+              <!-- GUIDANCE BLOCK -->
+              <div class="content-block block-guidance">
+                <div class="block-icon">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                </div>
+                <div class="block-body">
+                  <h4>Igei útmutatás</h4>
+                  <p id="detail-guidance-text" class="guidance-p"></p>
+                </div>
+              </div>
+
+              <!-- REFLECTION QUESTION BLOCK -->
+              <div class="content-block block-reflection">
+                <div class="block-icon">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 01-2 2h-0a2 2 0 01-2-2v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                </div>
+                <div class="block-body">
+                  <h4>Gondolkodj el!</h4>
+                  <p id="detail-reflection-text" class="reflection-p"></p>
+                </div>
+              </div>
+            </div>
+
+            <footer class="detail-footer">
+              <button type="button" id="btn-back-bottom" class="btn btn-primary">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Vissza az Életkerékhez
+              </button>
+            </footer>
+          </article>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer" role="contentinfo">
+      <div class="footer-inner">
+        <p>&copy; 2026 DiákÉletkerék &bull; Keresztyén önismereti statikus webalkalmazás középiskolásoknak</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

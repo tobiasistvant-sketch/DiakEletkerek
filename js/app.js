@@ -1,0 +1,409 @@
+/**
+ * DiákÉletkerék - Application Logic
+ * Manages state, navigation, form inputs, dynamic SVG wheel rendering,
+ * mode toggling (Életterületek / Összefüggések), and detail views.
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Application State
+  const state = {
+    scores: {
+      E01: 5,
+      E02: 5,
+      E03: 5,
+      E04: 5,
+      E05: 5,
+      E06: 5,
+      E07: 5,
+      E08: 5,
+      E09: 5,
+      E10: 5,
+      E11: 5,
+      E12: 5
+    },
+    activeScreen: 'screen-start',
+    activeWheelMode: 'areas', // 'areas' or 'pairs'
+    selectedDetail: null // { type: 'area'|'pair', item: Object }
+  };
+
+  // Color Palette for 12 Life Areas
+  const areaColors = [
+    '#2196F3', // E01 Blue
+    '#00BCD4', // E02 Cyan
+    '#009688', // E03 Teal
+    '#4CAF50', // E04 Green
+    '#8BC34A', // E05 Light Green
+    '#CDDC39', // E06 Lime
+    '#FFEB3B', // E07 Yellow
+    '#FFC107', // E08 Amber
+    '#FF9800', // E09 Orange
+    '#FF5722', // E10 Deep Orange
+    '#9C27B0', // E11 Purple
+    '#3F51B5'  // E12 Indigo
+  ];
+
+  // DOM Elements
+  const screens = {
+    start: document.getElementById('screen-start'),
+    assessment: document.getElementById('screen-assessment'),
+    wheel: document.getElementById('screen-wheel'),
+    detail: document.getElementById('screen-detail')
+  };
+
+  const btnStartTask = document.getElementById('btn-start-task');
+  const btnGenerateWheel = document.getElementById('btn-generate-wheel');
+  const btnRecalculate = document.getElementById('btn-recalculate');
+  const btnBackToWheel = document.getElementById('btn-back-to-wheel');
+  const btnBackBottom = document.getElementById('btn-back-bottom');
+  const headerLogoBtn = document.getElementById('header-logo-btn');
+
+  const toggleModeAreas = document.getElementById('toggle-mode-areas');
+  const toggleModePairs = document.getElementById('toggle-mode-pairs');
+
+  const assessmentCardsContainer = document.getElementById('assessment-cards-container');
+  const wheelSvgContainer = document.getElementById('wheel-svg-container');
+  const areasListContainer = document.getElementById('areas-list-container');
+  const pairsListContainer = document.getElementById('pairs-list-container');
+  const viewAreasList = document.getElementById('view-areas-list');
+  const viewPairsList = document.getElementById('view-pairs-list');
+
+  // Detail View Elements
+  const detailTypeBadge = document.getElementById('detail-type-badge');
+  const detailTitle = document.getElementById('detail-title');
+  const detailScoreBox = document.getElementById('detail-score-box');
+  const detailScoreVal = document.getElementById('detail-score-val');
+  const detailVerseText = document.getElementById('detail-verse-text');
+  const detailGuidanceText = document.getElementById('detail-guidance-text');
+  const detailReflectionText = document.getElementById('detail-reflection-text');
+
+  // Initialization
+  function init() {
+    renderAssessmentForm();
+    setupEventListeners();
+  }
+
+  // Navigation Function
+  function showScreen(screenId) {
+    Object.keys(screens).forEach(id => {
+      if (id === screenId) {
+        screens[id].classList.add('active');
+      } else {
+        screens[id].classList.remove('active');
+      }
+    });
+    state.activeScreen = screenId;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 1. Render Assessment Cards
+  function renderAssessmentForm() {
+    assessmentCardsContainer.innerHTML = '';
+
+    LIFE_AREAS.forEach((area, index) => {
+      const card = document.createElement('div');
+      card.className = 'assessment-card';
+
+      const currentVal = state.scores[area.id] || 5;
+
+      card.innerHTML = `
+        <div>
+          <div class="card-number">${index + 1} / 12 életterület</div>
+          <h3 class="card-title">${area.title}</h3>
+          <p class="card-desc">${area.shortDescription}</p>
+        </div>
+        <div class="score-control">
+          <div class="score-header-row">
+            <span class="score-text-label">Elégedettség:</span>
+            <span class="score-value-badge" id="val-badge-${area.id}">${currentVal} / 10</span>
+          </div>
+          <input
+            type="range"
+            class="slider-input"
+            id="input-${area.id}"
+            min="1"
+            max="10"
+            value="${currentVal}"
+            aria-label="${area.title} pontszám"
+          >
+          <div class="slider-ticks">
+            <span>1</span>
+            <span>5</span>
+            <span>10</span>
+          </div>
+        </div>
+      `;
+
+      assessmentCardsContainer.appendChild(card);
+
+      // Event listener for slider
+      const slider = card.querySelector(`#input-${area.id}`);
+      const badge = card.querySelector(`#val-badge-${area.id}`);
+
+      slider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        state.scores[area.id] = val;
+        badge.textContent = `${val} / 10`;
+      });
+    });
+  }
+
+  // 2. Render Interactive SVG Wheel
+  function renderWheelSVG() {
+    const size = 480;
+    const center = size / 2;
+    const maxRadius = 180;
+    const minRadius = 25;
+    const totalSlices = 12;
+    const sliceAngle = (2 * Math.PI) / totalSlices;
+
+    let svgHtml = `<svg width="100%" height="100%" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DiákÉletkerék Diagram">`;
+
+    // Background Concentric Circles (Grid 1 to 10)
+    for (let i = 1; i <= 10; i++) {
+      const r = minRadius + (i / 10) * (maxRadius - minRadius);
+      const strokeWidth = i === 5 || i === 10 ? '1.5' : '0.75';
+      const strokeColor = i === 10 ? '#B0BEC5' : '#E0E5E8';
+      svgHtml += `<circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${i < 10 ? '3 3' : 'none'}"/>`;
+    }
+
+    // Spokes / Axis lines
+    for (let i = 0; i < totalSlices; i++) {
+      const angle = i * sliceAngle - Math.PI / 2;
+      const x2 = center + maxRadius * Math.cos(angle);
+      const y2 = center + maxRadius * Math.sin(angle);
+      svgHtml += `<line x1="${center}" y1="${center}" x2="${x2}" y2="${y2}" stroke="#CFD8DC" stroke-width="1"/>`;
+    }
+
+    // Render 12 Filled Slices based on Score
+    LIFE_AREAS.forEach((area, i) => {
+      const score = state.scores[area.id] || 5;
+      const currentRadius = minRadius + (score / 10) * (maxRadius - minRadius);
+      const startAngle = i * sliceAngle - Math.PI / 2;
+      const endAngle = (i + 1) * sliceAngle - Math.PI / 2;
+
+      // Arc coordinates
+      const x1 = center + currentRadius * Math.cos(startAngle);
+      const y1 = center + currentRadius * Math.sin(startAngle);
+      const x2 = center + currentRadius * Math.cos(endAngle);
+      const y2 = center + currentRadius * Math.sin(endAngle);
+
+      const pathData = [
+        `M ${center} ${center}`,
+        `L ${x1} ${y1}`,
+        `A ${currentRadius} ${currentRadius} 0 0 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+
+      const fillColor = areaColors[i % areaColors.length];
+
+      // Text Label coordinates
+      const midAngle = startAngle + sliceAngle / 2;
+      const labelRadius = maxRadius + 32;
+      const labelX = center + labelRadius * Math.cos(midAngle);
+      const labelY = center + labelRadius * Math.sin(midAngle);
+
+      // Text Anchor based on position
+      let textAnchor = 'middle';
+      if (Math.cos(midAngle) > 0.2) textAnchor = 'start';
+      if (Math.cos(midAngle) < -0.2) textAnchor = 'end';
+
+      svgHtml += `
+        <g class="wheel-slice-group" data-area-id="${area.id}" tabIndex="0" role="button" aria-label="${area.title}: ${score} pont">
+          <path d="${pathData}" fill="${fillColor}" fill-opacity="0.78" stroke="#FFFFFF" stroke-width="2"/>
+          <circle cx="${labelX}" cy="${labelY}" r="14" fill="${fillColor}" />
+          <text x="${labelX}" y="${labelY + 4}" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="11" text-anchor="middle">${score}</text>
+        </g>
+      `;
+    });
+
+    // Center decor circle
+    svgHtml += `
+      <circle cx="${center}" cy="${center}" r="${minRadius - 2}" fill="#052738" stroke="#FFFFFF" stroke-width="2"/>
+      <text x="${center}" y="${center + 4}" fill="#31B6C7" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="12" text-anchor="middle">KERÉK</text>
+    `;
+
+    svgHtml += `</svg>`;
+    wheelSvgContainer.innerHTML = svgHtml;
+
+    // Attach click events to SVG slices
+    const sliceGroups = wheelSvgContainer.querySelectorAll('.wheel-slice-group');
+    sliceGroups.forEach(group => {
+      const areaId = group.getAttribute('data-area-id');
+      group.addEventListener('click', () => {
+        openAreaDetail(areaId);
+      });
+      group.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openAreaDetail(areaId);
+        }
+      });
+    });
+  }
+
+  // 3. Render List Views (Areas & Pairs)
+  function renderWheelLists() {
+    // 3.1 Render Areas List
+    areasListContainer.innerHTML = '';
+    LIFE_AREAS.forEach((area, index) => {
+      const score = state.scores[area.id] || 5;
+      const color = areaColors[index % areaColors.length];
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'area-select-btn';
+      btn.innerHTML = `
+        <span class="btn-area-title">
+          <span class="area-color-dot" style="background-color: ${color};"></span>
+          ${index + 1}. ${area.title}
+        </span>
+        <span class="btn-area-score">${score} / 10</span>
+      `;
+
+      btn.addEventListener('click', () => {
+        openAreaDetail(area.id);
+      });
+
+      areasListContainer.appendChild(btn);
+    });
+
+    // 3.2 Render Interconnections (Pairs) List
+    pairsListContainer.innerHTML = '';
+
+    // Mapping 6 interconnection pairs to life area IDs
+    const pairMappings = [
+      { id: 'P01', area1: 'E01', area2: 'E07' },
+      { id: 'P02', area1: 'E02', area2: 'E08' },
+      { id: 'P03', area1: 'E03', area2: 'E09' },
+      { id: 'P04', area1: 'E04', area2: 'E10' },
+      { id: 'P05', area1: 'E05', area2: 'E11' },
+      { id: 'P06', area1: 'E06', area2: 'E12' }
+    ];
+
+    INTERCONNECTIONS.forEach((pair, index) => {
+      const map = pairMappings.find(m => m.id === pair.id);
+      const score1 = state.scores[map.area1] || 5;
+      const score2 = state.scores[map.area2] || 5;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pair-select-btn';
+      btn.innerHTML = `
+        <div class="pair-btn-title">${index + 1}. ${pair.title}</div>
+        <div class="pair-btn-scores">
+          Pontszámaid: <strong>${score1}/10</strong> ↔ <strong>${score2}/10</strong>
+        </div>
+      `;
+
+      btn.addEventListener('click', () => {
+        openPairDetail(pair.id, map);
+      });
+
+      pairsListContainer.appendChild(btn);
+    });
+  }
+
+  // 4. Detail Navigation Functions
+  function openAreaDetail(areaId) {
+    const area = LIFE_AREAS.find(a => a.id === areaId);
+    if (!area) return;
+
+    const score = state.scores[area.id] || 5;
+
+    detailTypeBadge.textContent = 'Életterület';
+    detailTitle.textContent = area.title;
+    detailScoreBox.style.display = 'inline-flex';
+    detailScoreVal.textContent = `${score} / 10`;
+
+    detailVerseText.textContent = area.verse;
+    detailGuidanceText.textContent = area.guidance;
+    detailReflectionText.textContent = area.reflectionQuestion;
+
+    showScreen('detail');
+  }
+
+  function openPairDetail(pairId, map) {
+    const pair = INTERCONNECTIONS.find(p => p.id === pairId);
+    if (!pair) return;
+
+    const score1 = state.scores[map.area1] || 5;
+    const score2 = state.scores[map.area2] || 5;
+
+    detailTypeBadge.textContent = 'Összefüggés';
+    detailTitle.textContent = pair.title;
+    detailScoreBox.style.display = 'inline-flex';
+    detailScoreVal.textContent = `Pontjaid: ${score1}/10 ↔ ${score2}/10`;
+
+    detailVerseText.textContent = pair.verse;
+    detailGuidanceText.textContent = pair.guidance;
+    detailReflectionText.textContent = pair.reflectionQuestion;
+
+    showScreen('detail');
+  }
+
+  // 5. Toggle View Modes (Életterületek / Összefüggések)
+  function setWheelMode(mode) {
+    state.activeWheelMode = mode;
+    if (mode === 'areas') {
+      toggleModeAreas.classList.add('active');
+      toggleModeAreas.setAttribute('aria-selected', 'true');
+      toggleModePairs.classList.remove('active');
+      toggleModePairs.setAttribute('aria-selected', 'false');
+
+      viewAreasList.style.display = 'block';
+      viewPairsList.style.display = 'none';
+    } else {
+      toggleModePairs.classList.add('active');
+      toggleModePairs.setAttribute('aria-selected', 'true');
+      toggleModeAreas.classList.remove('active');
+      toggleModeAreas.setAttribute('aria-selected', 'false');
+
+      viewAreasList.style.display = 'none';
+      viewPairsList.style.display = 'block';
+    }
+  }
+
+  // Event Listeners setup
+  function setupEventListeners() {
+    // Header Logo navigation
+    if (headerLogoBtn) {
+      headerLogoBtn.addEventListener('click', () => {
+        showScreen('start');
+      });
+    }
+
+    // Start Task Button
+    btnStartTask.addEventListener('click', () => {
+      showScreen('assessment');
+    });
+
+    // Generate Wheel Button
+    btnGenerateWheel.addEventListener('click', () => {
+      renderWheelSVG();
+      renderWheelLists();
+      showScreen('wheel');
+    });
+
+    // Recalculate / Modify scores
+    btnRecalculate.addEventListener('click', () => {
+      renderAssessmentForm();
+      showScreen('assessment');
+    });
+
+    // Back to Wheel buttons
+    btnBackToWheel.addEventListener('click', () => {
+      showScreen('wheel');
+    });
+
+    btnBackBottom.addEventListener('click', () => {
+      showScreen('wheel');
+    });
+
+    // Toggle Modes
+    toggleModeAreas.addEventListener('click', () => setWheelMode('areas'));
+    toggleModePairs.addEventListener('click', () => setWheelMode('pairs'));
+  }
+
+  // Run App Init
+  init();
+});
