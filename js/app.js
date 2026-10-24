@@ -77,6 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const viewAreasList = document.getElementById('view-areas-list');
   const viewPairsList = document.getElementById('view-pairs-list');
 
+  // Modal Elements
+  const helpModal = document.getElementById('help-modal');
+  const modalAreaTitle = document.getElementById('modal-area-title');
+  const modalHelpText = document.getElementById('modal-help-text');
+  const modalCloseX = document.getElementById('modal-close-x');
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  let lastTriggerElement = null;
+
   // Detail View Elements
   const detailTypeBadge = document.getElementById('detail-type-badge');
   const detailTitle = document.getElementById('detail-title');
@@ -112,15 +120,23 @@ document.addEventListener('DOMContentLoaded', () => {
     LIFE_AREAS.forEach((area, index) => {
       const card = document.createElement('div');
       card.className = 'assessment-card';
+      card.id = `assessment-card-${area.id}`;
 
       const currentVal = state.scores[area.id] || 5;
 
       card.innerHTML = `
-        <div>
+        <div class="card-header-area">
           <div class="card-number">${index + 1} / 12 életterület</div>
           <h3 class="card-title">${area.title}</h3>
-          <p class="card-desc">${area.shortDescription}</p>
         </div>
+
+        <p class="card-question">${area.shortDescription}</p>
+
+        <div class="evaluation-tip-box">
+          <strong class="evaluation-tip-title">Mire figyelj a pontszámnál?</strong>
+          <p class="evaluation-tip-text">${area.evaluationTip}</p>
+        </div>
+
         <div class="score-control">
           <div class="score-header-row">
             <span class="score-text-label">Elégedettség:</span>
@@ -141,6 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>10</span>
           </div>
         </div>
+
+        <div class="card-actions-area">
+          <button type="button" class="btn btn-help-sugo" data-area-id="${area.id}">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            Önértékelő súgó
+          </button>
+        </div>
       `;
 
       assessmentCardsContainer.appendChild(card);
@@ -153,6 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = parseInt(e.target.value, 10);
         state.scores[area.id] = val;
         badge.textContent = `${val} / 10`;
+      });
+
+      // Event listener for "Önértékelő súgó" button
+      const helpBtn = card.querySelector(`.btn-help-sugo`);
+      helpBtn.addEventListener('click', () => {
+        openHelpModal(area.id, helpBtn);
       });
     });
   }
@@ -535,6 +567,59 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle Modes
     toggleModeAreas.addEventListener('click', () => setWheelMode('areas'));
     toggleModePairs.addEventListener('click', () => setWheelMode('pairs'));
+
+    // Modal Close Events
+    if (modalCloseBtn) {
+      modalCloseBtn.addEventListener('click', closeHelpModal);
+    }
+    if (modalCloseX) {
+      modalCloseX.addEventListener('click', closeHelpModal);
+    }
+    if (helpModal) {
+      helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) {
+          closeHelpModal();
+        }
+      });
+    }
+
+    // Escape key handling for modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && helpModal && helpModal.classList.contains('active')) {
+        closeHelpModal();
+      }
+    });
+  }
+
+  // Modal Functions
+  function openHelpModal(areaId, triggerBtn) {
+    const area = LIFE_AREAS.find(a => a.id === areaId);
+    if (!area) return;
+
+    lastTriggerElement = triggerBtn || document.activeElement;
+
+    modalAreaTitle.textContent = area.title;
+    modalHelpText.textContent = area.detailedHelp;
+
+    helpModal.classList.add('active');
+    helpModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    setTimeout(() => {
+      if (modalCloseBtn) modalCloseBtn.focus();
+    }, 50);
+  }
+
+  function closeHelpModal() {
+    if (!helpModal || !helpModal.classList.contains('active')) return;
+
+    helpModal.classList.remove('active');
+    helpModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+
+    if (lastTriggerElement && typeof lastTriggerElement.focus === 'function') {
+      lastTriggerElement.focus();
+    }
   }
 
   // Run App Init

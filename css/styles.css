@@ -79,6 +79,10 @@ body {
   overflow-x: hidden;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 .skip-link {
   position: absolute;
   top: -100px;
@@ -407,27 +411,87 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.card-header-area {
+  margin-bottom: 0.5rem;
+}
+
 .card-number {
   font-family: var(--font-heading);
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--color-header-sub);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .card-title {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   color: var(--color-header-bg);
-  margin-bottom: 0.5rem;
 }
 
-.card-desc {
-  font-size: 0.92rem;
-  color: var(--color-text-muted);
+.card-question {
+  font-size: 0.95rem;
+  color: var(--color-text-main);
   line-height: 1.5;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* Evaluation Tip Info Box ("Mire figyelj a pontszámnál?") */
+.evaluation-tip-box {
+  background: #F0F7FA;
+  border: 1px solid #D0E3EC;
+  border-left: 3.5px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
   margin-bottom: 1.25rem;
-  flex: 1;
+}
+
+.evaluation-tip-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-header-bg);
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.evaluation-tip-text {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #2D3E4A;
+}
+
+.score-control {
+  margin-bottom: 1rem;
+}
+
+.card-actions-area {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.btn-help-sugo {
+  background: var(--color-surface-white);
+  color: var(--color-header-bg);
+  border: 1.5px solid var(--color-header-sub);
+  padding: 0.5rem 0.95rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-help-sugo:hover {
+  background: #EBF7F9;
+  border-color: var(--color-header-bg);
+  color: var(--color-header-bg);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(5, 39, 56, 0.08);
 }
 
 .score-control {
@@ -846,6 +910,128 @@ body {
   font-size: 0.85rem;
   margin-top: auto;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   Modal Window Styles ("Önértékelő súgó")
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 39, 56, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1.25rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: var(--color-surface-white);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 580px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 2.25rem 2rem 2rem 2rem;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+  transform: translateY(12px);
+  transition: transform var(--transition-normal);
+}
+
+.modal-overlay.active .modal-card {
+  transform: translateY(0);
+}
+
+.modal-close-x {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-surface-grey);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modal-close-x:hover {
+  background: var(--color-border);
+  color: var(--color-header-bg);
+  transform: scale(1.05);
+}
+
+.modal-header {
+  margin-bottom: 1.25rem;
+  padding-right: 2rem;
+}
+
+.modal-subtitle {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-header-sub);
+  margin-bottom: 0.25rem;
+}
+
+.modal-area-title {
+  font-family: var(--font-heading);
+  font-size: 1.85rem;
+  color: var(--color-header-bg);
+  line-height: 1.25;
+}
+
+.modal-body {
+  margin-bottom: 1.75rem;
+  background: var(--color-bg-warm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-section-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-header-bg);
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+.modal-help-text {
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--color-text-main);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-border);
+  padding-top: 1.25rem;
 }
 
 /* Responsive Overrides */
