@@ -112,7 +112,7 @@ const LIFE_AREAS = [
   },
   {
     "id": "E12",
-    "title": "Környezetem és teremtésvédelem",
+    "title": "Környezetem és természetvédelem",
     "shortDescription": "Mennyire figyelsz a téged körülvevő környezetre és a teremtett világ megóvására?",
     "verse": "Fogta tehát az Úristen az embert, és elhelyezte az Éden kertjében, hogy művelje és őrizze azt. - 1Mózes 2,15",
     "guidance": "A környezet nem csupán háttér az életünkhöz: otthonunk, közös felelősségünk és Isten teremtett világának része. A bibliai megbízatás nem korlátlan uralmat jelent, hanem gondoskodást. Ez a szemlélet megjelenhet abban, hogyan bánunk a vízzel, az energiával, a hulladékkal vagy a közösen használt terekkel. Egy ember nem tudja egyedül megoldani az egész világ problémáit, mégis vannak döntések, amelyekben felelősen cselekedhetünk. A kis lépések értelme nem a bűntudatkeltés, hanem a hűséges gondoskodás.",
@@ -160,7 +160,7 @@ const INTERCONNECTIONS = [
   },
   {
     "id": "P06",
-    "title": "Egészség és jóllét ↔ Környezetem és teremtésvédelem",
+    "title": "Egészség és jóllét ↔ Környezetem és természetvédelem",
     "verse": "Dávid zsoltára. Az Úré a föld és ami betölti, a földkerekség és a rajta lakók. - Zsoltárok 24,1",
     "guidance": "Az ember életminőségére hatással lehet a környezet, amelyben él: a levegő, a zaj, a közösségi terek, a lakóhely és az elérhető lehetőségek. Eközben a döntéseink bizonyos mértékig a környezetet is alakítják. A bibliai sáfárság szemlélete szerint nem korlátlan tulajdonosai vagyunk a teremtett világnak, hanem gondozásra kaptuk. Ez összekapcsolható az önmagunkról és a közös élettérről való felelős gondoskodással, de fontos a határokat is látni: sem az egészségi állapotunk, sem a környezeti problémák nem vezethetők vissza egyszerűen egyéni döntéseinkre. A pár tehát nem ok-okozati bizonyíték, hanem meghívás annak végiggondolására, mit kaptunk, miért lehetünk hálásak, és mire van valódi ráhatásunk.",
     "reflectionQuestion": "Van-e olyan változtatás a közvetlen környezetemben, amely nekem és másoknak is jót tehet?"
