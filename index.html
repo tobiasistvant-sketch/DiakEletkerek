@@ -251,6 +251,31 @@
 
   </div>
 
+  <!-- MODAL FOR ÖNÉRTÉKELŐ SÚGÓ -->
+  <div id="help-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-area-title">
+    <div class="modal-card">
+      <button type="button" class="modal-close-x" id="modal-close-x" aria-label="Bezárás">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <div class="modal-header">
+        <span class="modal-subtitle">Önértékelő súgó</span>
+        <h3 id="modal-area-title" class="modal-area-title">Életterület neve</h3>
+      </div>
+
+      <div class="modal-body">
+        <h4 class="modal-section-title">Súgó a pontozáshoz</h4>
+        <p id="modal-help-text" class="modal-help-text"></p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="modal-close-btn" class="btn btn-secondary">Bezárás</button>
+      </div>
+    </div>
+  </div>
+
   <!-- JavaScript Scripts -->
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
