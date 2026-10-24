@@ -553,7 +553,7 @@ body {
 
 .svg-wheel-wrapper {
   width: 100%;
-  max-width: 480px;
+  max-width: 600px;
   aspect-ratio: 1 / 1;
 }
 
@@ -568,7 +568,7 @@ body {
 
 .wheel-slice-group.pair-highlight path {
   filter: brightness(1.15) saturate(1.2);
-  stroke: #052738;
+  stroke: #DC2626;
   stroke-width: 3.5px;
 }
 

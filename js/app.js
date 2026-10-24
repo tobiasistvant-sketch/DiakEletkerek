@@ -157,11 +157,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Helper to split life area titles into up to 2 readable lines
+  function splitTitle(title) {
+    const parts = title.split(' ');
+    if (parts.length <= 1) return [title];
+    if (parts.length === 3 && parts[1] === 'és') {
+      return [parts[0] + ' ' + parts[1], parts[2]];
+    }
+    const mid = Math.ceil(parts.length / 2);
+    return [parts.slice(0, mid).join(' '), parts.slice(mid).join(' ')];
+  }
+
   // 2. Render Interactive SVG Wheel
   function renderWheelSVG() {
-    const size = 480;
+    const size = 680;
     const center = size / 2;
     const maxRadius = 180;
+    const scoreCircleRadius = maxRadius + 24;
     const minRadius = 25;
     const totalSlices = 12;
     const sliceAngle = (2 * Math.PI) / totalSlices;
@@ -206,16 +218,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const fillColor = areaColors[i % areaColors.length];
 
-      // Text Label coordinates
+      // Score Circle coordinates
       const midAngle = startAngle + sliceAngle / 2;
-      const labelRadius = maxRadius + 32;
-      const labelX = center + labelRadius * Math.cos(midAngle);
-      const labelY = center + labelRadius * Math.sin(midAngle);
+      const circleX = center + scoreCircleRadius * Math.cos(midAngle);
+      const circleY = center + scoreCircleRadius * Math.sin(midAngle);
 
-      // Text Anchor based on position
+      // Label positioning relative to score circle
+      const cos = Math.cos(midAngle);
+      const sin = Math.sin(midAngle);
+
       let textAnchor = 'middle';
-      if (Math.cos(midAngle) > 0.2) textAnchor = 'start';
-      if (Math.cos(midAngle) < -0.2) textAnchor = 'end';
+      let labelX = circleX;
+      let labelY = circleY;
+
+      if (cos > 0.3) {
+        textAnchor = 'start';
+        labelX = circleX + 18;
+        labelY = circleY;
+      } else if (cos < -0.3) {
+        textAnchor = 'end';
+        labelX = circleX - 18;
+        labelY = circleY;
+      } else if (sin < 0) {
+        if (cos >= 0) {
+          textAnchor = 'start';
+          labelX = circleX + 16;
+          labelY = circleY - 6;
+        } else {
+          textAnchor = 'end';
+          labelX = circleX - 16;
+          labelY = circleY - 6;
+        }
+      } else {
+        if (cos >= 0) {
+          textAnchor = 'start';
+          labelX = circleX + 16;
+          labelY = circleY + 6;
+        } else {
+          textAnchor = 'end';
+          labelX = circleX - 16;
+          labelY = circleY + 6;
+        }
+      }
+
+      const lines = splitTitle(area.title);
+      let textLinesHtml = '';
+
+      if (lines.length === 1) {
+        textLinesHtml = `<text x="${labelX}" y="${labelY + 4}" fill="#1C2D37" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="12" text-anchor="${textAnchor}">${lines[0]}</text>`;
+      } else {
+        textLinesHtml = `
+          <text x="${labelX}" y="${labelY - 3}" fill="#1C2D37" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="12" text-anchor="${textAnchor}">
+            <tspan x="${labelX}" dy="0">${lines[0]}</tspan>
+            <tspan x="${labelX}" dy="14">${lines[1]}</tspan>
+          </text>
+        `;
+      }
 
       const pairMap = PAIR_MAPPINGS.find(m => m.area1 === area.id || m.area2 === area.id);
       const pairId = pairMap ? pairMap.id : '';
@@ -223,8 +281,9 @@ document.addEventListener('DOMContentLoaded', () => {
       svgHtml += `
         <g class="wheel-slice-group" data-area-id="${area.id}" data-pair-id="${pairId}" tabIndex="0" role="button" aria-label="${area.title}: ${score} pont">
           <path d="${pathData}" fill="${fillColor}" fill-opacity="0.78" stroke="#FFFFFF" stroke-width="2"/>
-          <circle cx="${labelX}" cy="${labelY}" r="14" fill="${fillColor}" />
-          <text x="${labelX}" y="${labelY + 4}" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="11" text-anchor="middle">${score}</text>
+          <circle cx="${circleX}" cy="${circleY}" r="14" fill="${fillColor}" />
+          <text x="${circleX}" y="${circleY + 4}" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="11" text-anchor="middle">${score}</text>
+          ${textLinesHtml}
         </g>
       `;
     });
