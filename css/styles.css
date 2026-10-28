@@ -545,6 +545,21 @@ body.modal-open {
   outline-offset: 2px;
 }
 
+/* Displayed if the learner has not rated all 12 life areas. */
+.assessment-validation {
+  color: #9B1C31;
+  background: #FFF0F2;
+  border: 1px solid #F3CBD1;
+  border-left: 4px solid #C94B61;
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  max-width: 44rem;
+  text-align: left;
+}
+.assessment-validation[hidden] { display: none; }
+
 .score-control {
   background: var(--color-bg-warm);
   border: 1px solid var(--color-border);
