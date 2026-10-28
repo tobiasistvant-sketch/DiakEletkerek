@@ -475,12 +475,19 @@ body.modal-open {
   color: var(--color-header-bg);
 }
 
+/* Self-assessment question: visually parallel to the evaluation tip,
+   with a distinct, gentle red palette. Applies to all 12 life areas. */
 .card-question {
   font-size: 0.95rem;
   color: var(--color-text-main);
   line-height: 1.5;
-  margin-bottom: 1rem;
   font-weight: 500;
+  background: #FFF0F2;
+  border: 1px solid #F3CBD1;
+  border-left: 3.5px solid #C94B61;
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.85rem;
 }
 
 /* Evaluation Tip Info Box ("Mire figyelj a pontszámnál?") */
