@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     activeScreen: 'screen-start',
     activeWheelMode: 'areas', // 'areas' or 'pairs'
+    selectedAreaId: null, // persists when returning from a single-area detail
     selectedDetail: null // { type: 'area'|'pair', item: Object }
   };
 
@@ -63,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnStartTask = document.getElementById('btn-start-task');
   const btnGenerateWheel = document.getElementById('btn-generate-wheel');
   const btnRecalculate = document.getElementById('btn-recalculate');
+  const btnDownloadWheel = document.getElementById('btn-download-wheel');
+  const wheelDownloadStatus = document.getElementById('wheel-download-status');
   const btnBackToWheel = document.getElementById('btn-back-to-wheel');
   const btnBackBottom = document.getElementById('btn-back-bottom');
   const headerLogoBtn = document.getElementById('header-logo-btn');
@@ -325,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Center decor circle
     svgHtml += `
       <circle cx="${center}" cy="${center}" r="${minRadius - 2}" fill="#052738" stroke="#FFFFFF" stroke-width="2"/>
-      <text x="${center}" y="${center + 4}" fill="#31B6C7" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="12" text-anchor="middle">KERÉK</text>
     `;
 
     svgHtml += `</svg>`;
@@ -351,27 +353,30 @@ document.addEventListener('DOMContentLoaded', () => {
       group.addEventListener('mouseenter', () => {
         if (state.activeWheelMode === 'pairs' && pairId) {
           highlightPairSlices(pairId, true);
+        } else if (state.activeWheelMode === 'areas') {
+          group.classList.add('area-hover');
         }
       });
 
       group.addEventListener('mouseleave', () => {
-        if (pairId) {
-          highlightPairSlices(pairId, false);
-        }
+        group.classList.remove('area-hover');
+        if (pairId) highlightPairSlices(pairId, false);
       });
 
       group.addEventListener('focus', () => {
         if (state.activeWheelMode === 'pairs' && pairId) {
           highlightPairSlices(pairId, true);
+        } else if (state.activeWheelMode === 'areas') {
+          group.classList.add('area-hover');
         }
       });
 
       group.addEventListener('blur', () => {
-        if (pairId) {
-          highlightPairSlices(pairId, false);
-        }
+        group.classList.remove('area-hover');
+        if (pairId) highlightPairSlices(pairId, false);
       });
     });
+    updateAreaSelection();
   }
 
   // 3. Render List Views (Areas & Pairs)
@@ -396,6 +401,11 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => {
         openAreaDetail(area.id);
       });
+
+      btn.addEventListener('mouseenter', () => highlightAreaHover(area.id, true));
+      btn.addEventListener('mouseleave', () => highlightAreaHover(area.id, false));
+      btn.addEventListener('focus', () => highlightAreaHover(area.id, true));
+      btn.addEventListener('blur', () => highlightAreaHover(area.id, false));
 
       areasListContainer.appendChild(btn);
     });
@@ -453,6 +463,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Keep exactly one life area selected in the single-area view.
+  // Switching to pairs hides (but does not forget) this selection.
+  function updateAreaSelection() {
+    wheelSvgContainer.querySelectorAll('.wheel-slice-group').forEach(group => {
+      const selected = state.activeWheelMode === 'areas' &&
+        group.getAttribute('data-area-id') === state.selectedAreaId;
+      group.classList.toggle('area-highlight', selected);
+      group.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+  }
+
+  function highlightAreaHover(areaId, highlight) {
+    const group = wheelSvgContainer.querySelector(
+      `.wheel-slice-group[data-area-id="${areaId}"]`
+    );
+    if (group) group.classList.toggle('area-hover', highlight && state.activeWheelMode === 'areas');
+  }
+
   function highlightPairSlices(pairId, highlight) {
     if (!pairId) return;
     const slices = wheelSvgContainer.querySelectorAll(`.wheel-slice-group[data-pair-id="${pairId}"]`);
@@ -469,6 +497,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function openAreaDetail(areaId) {
     const area = LIFE_AREAS.find(a => a.id === areaId);
     if (!area) return;
+
+    state.selectedAreaId = area.id;
+    wheelSvgContainer.querySelectorAll('.area-hover').forEach(group => group.classList.remove('area-hover'));
+    updateAreaSelection();
 
     const score = state.scores[area.id] ?? 0;
 
@@ -508,8 +540,8 @@ document.addEventListener('DOMContentLoaded', () => {
     state.activeWheelMode = mode;
 
     // Clear any active pair highlights when switching modes
-    const highlightedSlices = wheelSvgContainer.querySelectorAll('.pair-highlight');
-    highlightedSlices.forEach(s => s.classList.remove('pair-highlight'));
+    const highlightedSlices = wheelSvgContainer.querySelectorAll('.pair-highlight, .area-hover');
+    highlightedSlices.forEach(s => s.classList.remove('pair-highlight', 'area-hover'));
 
     if (mode === 'areas') {
       toggleModeAreas.classList.add('active');
@@ -527,6 +559,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
       viewAreasList.style.display = 'none';
       viewPairsList.style.display = 'block';
+    }
+    updateAreaSelection();
+  }
+
+  // Export only the user's wheel as a high-resolution PNG, entirely in-browser.
+  // No upload, third-party image service, email or server is involved.
+  function downloadWheelPNG() {
+    const originalSvg = wheelSvgContainer.querySelector('svg');
+    if (!originalSvg || !btnDownloadWheel || btnDownloadWheel.disabled) return;
+
+    btnDownloadWheel.disabled = true;
+    if (wheelDownloadStatus) wheelDownloadStatus.textContent = 'A PNG-kép előkészítése…';
+
+    const complete = (message) => {
+      btnDownloadWheel.disabled = false;
+      if (wheelDownloadStatus) wheelDownloadStatus.textContent = message;
+    };
+
+    try {
+      const cleanSvg = originalSvg.cloneNode(true);
+      cleanSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      cleanSvg.setAttribute('width', '680');
+      cleanSvg.setAttribute('height', '680');
+      // A mentett eredmény a teljes életkereket mutatja, nem az éppen kijelölt szeletet.
+      cleanSvg.querySelectorAll('.area-highlight, .area-hover, .pair-highlight').forEach(group => {
+        group.classList.remove('area-highlight', 'area-hover', 'pair-highlight');
+      });
+
+      const svgSource = new XMLSerializer().serializeToString(cleanSvg);
+      const svgUrl = URL.createObjectURL(new Blob([svgSource], { type: 'image/svg+xml;charset=utf-8' }));
+      const image = new Image();
+
+      image.onload = () => {
+        try {
+          const scale = 3;
+          const width = 780;
+          const height = 850;
+          const canvas = document.createElement('canvas');
+          canvas.width = width * scale;
+          canvas.height = height * scale;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas context is unavailable');
+
+          ctx.scale(scale, scale);
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, width, height);
+
+          ctx.fillStyle = '#052738';
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 30px sans-serif';
+          ctx.fillText('DiákÉletkerék', width / 2, 48);
+          ctx.font = '15px sans-serif';
+          ctx.fillText('Saját önértékelés – 12 életterület', width / 2, 81);
+          ctx.drawImage(image, 50, 104, 680, 680);
+          ctx.fillStyle = '#5A6E7B';
+          ctx.font = '13px sans-serif';
+          ctx.fillText('Az értékek az adott életterülettel való elégedettséget jelölik (1–10).', width / 2, 822);
+
+          URL.revokeObjectURL(svgUrl);
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              complete('Nem sikerült elkészíteni a PNG-képet. Próbáld újra!');
+              return;
+            }
+
+            const downloadUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = 'DiakEletkerek.png';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 30000);
+            complete('A PNG-letöltés elindult.');
+          }, 'image/png');
+        } catch (error) {
+          URL.revokeObjectURL(svgUrl);
+          complete('A kép mentése nem sikerült. Próbáld újra egy másik böngészőben!');
+        }
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(svgUrl);
+        complete('A kép előállítása nem sikerült. Próbáld újra!');
+      };
+      image.src = svgUrl;
+    } catch (error) {
+      complete('A PNG-letöltés nem sikerült. Próbáld újra!');
     }
   }
 
@@ -565,6 +685,11 @@ document.addEventListener('DOMContentLoaded', () => {
       renderWheelLists();
       showScreen('wheel');
     });
+
+    // Save the wheel image locally; the detail/list views are not part of the PNG.
+    if (btnDownloadWheel) {
+      btnDownloadWheel.addEventListener('click', downloadWheelPNG);
+    }
 
     // Recalculate / Modify scores
     btnRecalculate.addEventListener('click', () => {

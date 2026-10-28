@@ -160,11 +160,18 @@
             </div>
 
             <div class="wheel-actions">
+              <button type="button" id="btn-download-wheel" class="btn btn-primary btn-sm">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v12m-4-4 4 4 4-4M5 17v4h14v-4"/>
+                </svg>
+                DiákÉletkerék letöltése (PNG)
+              </button>
               <button type="button" id="btn-recalculate" class="btn btn-secondary btn-sm">
                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Pontszámok módosítása
               </button>
             </div>
+            <p id="wheel-download-status" class="wheel-download-status" role="status" aria-live="polite"></p>
           </div>
 
           <!-- LIST SELECTION AREA -->

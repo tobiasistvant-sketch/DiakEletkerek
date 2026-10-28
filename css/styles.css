@@ -703,6 +703,14 @@ body.modal-open {
   filter: brightness(1.12);
 }
 
+/* Individual areas use a teal border; the red border is reserved for pairs. */
+.wheel-slice-group.area-highlight path,
+.wheel-slice-group.area-hover path {
+  stroke: #0D7490;
+  stroke-width: 3.5px;
+  filter: brightness(1.12);
+}
+
 .wheel-slice-group.pair-highlight path {
   filter: brightness(1.15) saturate(1.2);
   stroke: #DC2626;
@@ -711,6 +719,20 @@ body.modal-open {
 
 .wheel-actions {
   margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wheel-download-status {
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  margin-top: 0.5rem;
+  min-height: 1.2em;
 }
 
 .wheel-list-card {
