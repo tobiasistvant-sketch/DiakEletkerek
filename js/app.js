@@ -8,18 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Application State
   const state = {
     scores: {
-      E01: 5,
-      E02: 5,
-      E03: 5,
-      E04: 5,
-      E05: 5,
-      E06: 5,
-      E07: 5,
-      E08: 5,
-      E09: 5,
-      E10: 5,
-      E11: 5,
-      E12: 5
+      E01: 0,
+      E02: 0,
+      E03: 0,
+      E04: 0,
+      E05: 0,
+      E06: 0,
+      E07: 0,
+      E08: 0,
+      E09: 0,
+      E10: 0,
+      E11: 0,
+      E12: 0
     },
     activeScreen: 'screen-start',
     activeWheelMode: 'areas', // 'areas' or 'pairs'
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'assessment-card';
       card.id = `assessment-card-${area.id}`;
 
-      const currentVal = state.scores[area.id] || 5;
+      const currentVal = state.scores[area.id] ?? 0;
 
       card.innerHTML = `
         <div class="card-header-area">
@@ -146,13 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
             type="range"
             class="slider-input"
             id="input-${area.id}"
-            min="1"
+            min="0"
             max="10"
             value="${currentVal}"
             aria-label="${area.title} pontszám"
           >
           <div class="slider-ticks">
-            <span>1</span>
+            <span>0</span>
             <span>5</span>
             <span>10</span>
           </div>
@@ -179,6 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = parseInt(e.target.value, 10);
         state.scores[area.id] = val;
         badge.textContent = `${val} / 10`;
+        const validationMessage = document.getElementById("assessment-validation");
+        if (validationMessage) validationMessage.hidden = true;
       });
 
       // Event listener for "Önértékelő súgó" button
@@ -230,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render 12 Filled Slices based on Score
     LIFE_AREAS.forEach((area, i) => {
-      const score = state.scores[area.id] || 5;
+      const score = state.scores[area.id] ?? 0;
       const currentRadius = minRadius + (score / 10) * (maxRadius - minRadius);
       const startAngle = i * sliceAngle - Math.PI / 2;
       const endAngle = (i + 1) * sliceAngle - Math.PI / 2;
@@ -377,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3.1 Render Areas List
     areasListContainer.innerHTML = '';
     LIFE_AREAS.forEach((area, index) => {
-      const score = state.scores[area.id] || 5;
+      const score = state.scores[area.id] ?? 0;
       const color = areaColors[index % areaColors.length];
 
       const btn = document.createElement('button');
@@ -403,8 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     INTERCONNECTIONS.forEach((pair, index) => {
       const map = PAIR_MAPPINGS.find(m => m.id === pair.id);
-      const score1 = state.scores[map.area1] || 5;
-      const score2 = state.scores[map.area2] || 5;
+      const score1 = state.scores[map.area1] ?? 0;
+      const score2 = state.scores[map.area2] ?? 0;
 
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -468,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const area = LIFE_AREAS.find(a => a.id === areaId);
     if (!area) return;
 
-    const score = state.scores[area.id] || 5;
+    const score = state.scores[area.id] ?? 0;
 
     detailTypeBadge.textContent = 'Életterület';
     detailTitle.textContent = area.title;
@@ -486,8 +488,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pair = INTERCONNECTIONS.find(p => p.id === pairId);
     if (!pair) return;
 
-    const score1 = state.scores[map.area1] || 5;
-    const score2 = state.scores[map.area2] || 5;
+    const score1 = state.scores[map.area1] ?? 0;
+    const score2 = state.scores[map.area2] ?? 0;
 
     detailTypeBadge.textContent = 'Összefüggés';
     detailTitle.textContent = pair.title;
@@ -544,6 +546,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generate Wheel Button
     btnGenerateWheel.addEventListener('click', () => {
+      // 0 means "not yet rated"; valid self-assessment scores remain 1–10.
+      const firstUnrated = LIFE_AREAS.find(area => state.scores[area.id] === 0);
+      if (firstUnrated) {
+        const validationMessage = document.getElementById('assessment-validation');
+        if (validationMessage) {
+          validationMessage.textContent = 'A DiákÉletkerék generálása előtt értékeld mind a 12 életterületet 1 és 10 között! A 0 azt jelenti, hogy még nem adtál pontszámot.';
+          validationMessage.hidden = false;
+        }
+        const missingSlider = document.getElementById(`input-${firstUnrated.id}`);
+        if (missingSlider) {
+          missingSlider.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          missingSlider.focus({ preventScroll: true });
+        }
+        return;
+      }
       renderWheelSVG();
       renderWheelLists();
       showScreen('wheel');
